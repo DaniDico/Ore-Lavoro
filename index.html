@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ore">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Ore di lavoro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--bg:#f2f4f8;--card:#fff;--tx:#161a20;--mu:#6c7683;--ac:#4f46e5;--ac2:#7c3aed;--bd:#e4e7ee;--we:#f7f8fb;--ok:#059669;--run:#f59e0b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1013;--card:#181b21;--tx:#eef1f6;--mu:#8b95a3;--bd:#262b34;--we:#14171c;--ok:#34d399;--run:#fbbf24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1013;--card:#181b21;--tx:#eef1f6;--mu:#8b95a3;--bd:#262b34;--we:#14171c;--ok:#34d399;--run:#fbbf24;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);padding:10px 14px 8px;display:flex;flex-direction:column;gap:8px;max-width:640px;margin:0 auto}
+.hn{display:flex;align-items:center;gap:8px}
+.arr{background:var(--card);border:1px solid var(--bd);width:42px;height:42px;border-radius:50%;font-size:20px;line-height:1}
+.ttl{flex:1;text-align:center;line-height:1.2}.ttl b{font-size:18px;display:block}.ttl span{color:var(--mu);font-size:13px}
+.tabs{display:flex;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:3px}
+.tabs button{flex:1;border:0;background:none;height:34px;border-radius:9px;font-size:14px;color:var(--mu)}
+.tabs button.on{background:var(--ac);color:#fff;font-weight:600}
+main{padding:4px 14px 120px;max-width:640px;margin:0 auto}
+.hero{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-radius:22px;padding:18px;margin-bottom:12px;box-shadow:0 10px 30px -14px var(--ac)}
+.hero .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.hero small{opacity:.85;font-size:13px}.hero .big{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.hero .st{font-size:13px;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:99px;white-space:nowrap}
+.hero .st.run{background:var(--run);color:#201500;font-weight:600}
+.punch{width:100%;margin-top:14px;height:56px;border:0;border-radius:16px;background:#fff;color:var(--ac);font-size:18px;font-weight:700}
+.punch:disabled{opacity:.55}
+.undo{background:none;border:0;color:#fff;opacity:.85;font-size:13px;margin-top:8px;text-decoration:underline;padding:4px 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px 12px}
+.stat span{color:var(--mu);font-size:12px;display:block}.stat b{font-size:19px;font-variant-numeric:tabular-nums}
+.day{background:var(--card);border:1px solid var(--bd);border-radius:14px;margin-bottom:6px;overflow:hidden}
+.day.we{background:var(--we)}.day.today{border-color:var(--ac)}
+.sum{width:100%;display:grid;grid-template-columns:50px 1fr auto;gap:8px;align-items:center;padding:11px 12px;background:none;border:0;text-align:left}
+.sum .n{font-weight:700}.sum .n small{display:block;color:var(--mu);font-weight:400;font-size:12px;margin-top:-3px}
+.sum .tm{color:var(--mu);font-size:13px;font-variant-numeric:tabular-nums}
+.sum .t{font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+.ed{display:none;padding:2px 12px 12px;border-top:1px dashed var(--bd)}
+.day.open .ed{display:block}
+.sh{display:grid;grid-template-columns:54px 1fr 1fr;gap:8px;align-items:center;margin-top:10px}
+.sh label{color:var(--mu);font-size:13px}
+.f{position:relative}
+input[type=time],input[type=text],input[type=number]{width:100%;min-width:0;height:46px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx);font:inherit;font-size:17px;padding:0 10px;text-align:center}
+input:focus{outline:2px solid var(--ac);border-color:transparent}
+.f .now{position:absolute;right:5px;top:5px;height:36px;border:0;border-radius:9px;background:var(--ac);color:#fff;font-size:12px;font-weight:600;padding:0 9px}
+.f.has .now{display:none}
+.acts{display:flex;gap:8px;margin-top:12px}
+.acts button,.btn{flex:1;height:42px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);font-size:14px}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 30%)}
+.bar button{display:block;width:100%;max-width:640px;margin:0 auto;height:52px;border:0;border-radius:16px;background:var(--tx);color:var(--bg);font-size:16px;font-weight:600}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;white-space:nowrap}
+.toast.on{opacity:1}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:10px}
+.card h3{margin:0 0 10px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
+.row{display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:center;margin-top:8px}
+.seg{display:flex;gap:6px}.seg button{flex:1;height:40px;border-radius:10px;border:1px solid var(--bd);background:var(--bg)}
+.seg button.on{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}
+.sw{display:flex;gap:12px}.sw button{width:38px;height:38px;border-radius:50%;border:3px solid transparent}
+.sw button.on{border-color:var(--tx)}
+.yh{display:flex;justify-content:space-between;align-items:baseline;margin:16px 4px 6px}
+.yh b{font-size:20px}.yh span{color:var(--mu);font-size:14px}
+.am{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px 8px 6px 4px;margin-bottom:6px}
+.ao{background:none;border:0;text-align:left;padding:6px 10px}.ao b{display:block}.ao small{color:var(--mu)}
+.at{font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+.ap{height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--bd);background:var(--bg);font-size:13px}
+.empty{text-align:center;color:var(--mu);padding:40px 10px}
+.col{margin-top:10px}.col label{display:block;color:var(--mu);font-size:13px;margin-bottom:4px}.col input{text-align:left}
+.code{font-family:ui-monospace,monospace;font-size:15px;letter-spacing:.04em;word-break:break-all;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px;margin:10px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="hn" id="hn">
+    <button class="arr" id="prev" aria-label="Mese precedente">‹</button>
+    <div class="ttl"><b id="title"></b><span id="sub"></span></div>
+    <button class="arr" id="next" aria-label="Mese successivo">›</button>
+  </div>
+  <nav class="tabs"><button data-tab="m" class="on">Mese</button><button data-tab="a">Archivio</button><button data-tab="s">Impostazioni</button></nav>
+</header>
+<main>
+  <section id="vm"><div id="hero"></div><div class="stats" id="stats"></div><div id="list"></div></section>
+  <section id="va" style="display:none"></section>
+  <section id="vs" style="display:none"></section>
+  <input type="file" id="file" accept=".json,application/json" hidden>
+</main>
+<div class="bar" id="bar"><button id="pdf">Esporta PDF del mese</button></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const MESI=["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+const GG=["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
+const KEY="ore-lavoro-v1",CFGKEY="ore-lavoro-cfg",EMPTY=()=>["","","",""];
+const PAL=[["#4f46e5","#7c3aed"],["#0ea5e9","#2563eb"],["#059669","#0d9488"],["#e11d48","#f97316"],["#475569","#0f172a"]];
+const LAB=["Inizia turno 1","Termina turno 1","Inizia turno 2","Termina turno 2"];
+let data={},cfg={s1:"12:00",s2:"19:00",name:"",rate:0,dec:false,theme:"auto",pal:0};
+try{data=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+try{Object.assign(cfg,JSON.parse(localStorage.getItem(CFGKEY)||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
+const saveCfg=()=>{try{localStorage.setItem(CFGKEY,JSON.stringify(cfg))}catch(e){}};
+const STD=()=>[cfg.s1,"",cfg.s2,""];
+function applyCfg(){
+  const r=document.documentElement,p=PAL[cfg.pal]||PAL[0];
+  r.style.setProperty("--ac",p[0]);r.style.setProperty("--ac2",p[1]);
+  cfg.theme==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",cfg.theme);
+  document.querySelector("meta[name=theme-color]").content=p[0];
+}
+let now=new Date(),cur={y:now.getFullYear(),m:now.getMonth()},openDay=null,tab="m";
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const keyOf=c=>c.y+"-"+pad(c.m+1),mk=()=>keyOf(cur);
+const tm=s=>{const [h,m]=s.split(":").map(Number);return h*60+m};
+const dur=(a,b)=>(!a||!b)?0:((tm(b)-tm(a)+1440)%1440);
+const fmt=m=>cfg.dec?(m/60).toFixed(2).replace(".",","):Math.floor(m/60)+":"+pad(m%60);
+const nowStr=()=>{const d=new Date();return pad(d.getHours())+":"+pad(d.getMinutes())};
+const dim=(c=cur)=>new Date(c.y,c.m+1,0).getDate();
+const getK=(k,d)=>((data[k]||{})[d])||EMPTY();
+const get=d=>getK(mk(),d);
+function set(d,v){const k=mk();data[k]=data[k]||{};v.every(x=>!x)?delete data[k][d]:data[k][d]=v;save()}
+const totV=v=>dur(v[0],v[1])+dur(v[2],v[3]);
+const dayTot=d=>totV(get(d));
+function mstats(k){let t=0,g=0;const o=data[k]||{};for(const d in o){const s=totV(o[d]);t+=s;if(s)g++}return{t,g}}
+const money=(m)=>(m/60*cfg.rate).toFixed(2).replace(".",",");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2500)}
+const isCur=()=>cur.y===now.getFullYear()&&cur.m===now.getMonth();
+
+function hero(){
+  const h=$("hero");
+  if(!isCur()){h.innerHTML="";return}
+  const d=now.getDate(),v=get(d),i=v.findIndex(x=>!x),run=i===1||i===3;
+  let st="Non iniziato",ex="";
+  if(i===-1)st="Giornata completa";
+  else if(run){st="In corso";ex=" · da "+fmt((tm(nowStr())-tm(v[i-1])+1440)%1440)}
+  else if(i===2)st="In pausa";
+  h.innerHTML='<div class="hero"><div class="top"><div><small>Oggi · '+GG[now.getDay()]+" "+d+" "+MESI[cur.m].toLowerCase()+'</small><div class="big">'+fmt(dayTot(d))+'</div></div><span class="st'+(run?" run":"")+'">'+st+ex+'</span></div>'+
+  '<button class="punch" id="punch"'+(i===-1?" disabled":"")+'>'+(i===-1?"Fatto per oggi":LAB[i]+" · "+(i%2?nowStr():STD()[i]))+'</button>'+
+  (v.some(x=>x)?'<button class="undo" id="undo">Annulla ultima ora inserita</button>':"")+'</div>';
+  if($("punch"))$("punch").onclick=()=>{if(i<0)return;const w=get(d);w[i]=i%2?nowStr():STD()[i];set(d,w);render();toast(LAB[i]+" registrato")};
+  if($("undo"))$("undo").onclick=()=>{const w=get(d);for(let k=3;k>=0;k--)if(w[k]){w[k]="";break}set(d,w);render()};
+}
+function stats(){
+  const s=mstats(mk());
+  $("sub").textContent="Totale "+fmt(s.t)+(cfg.dec?" ore":" h");
+  let a=[["Totale",fmt(s.t)],["Giorni",s.g],["Media",fmt(s.g?Math.round(s.t/s.g):0)]];
+  if(cfg.rate>0)a.push(["Compenso",money(s.t)+" €"]);
+  $("stats").innerHTML=a.map(x=>'<div class="stat"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join("");
+}
+function field(d,i,val){return '<div class="f'+(val?" has":"")+'"><input type="time" data-d="'+d+'" data-i="'+i+'" value="'+val+'"><button class="now" data-d="'+d+'" data-i="'+i+'">'+(i%2?"Ora":STD()[i])+'</button></div>'}
+function list(){
+  let out="";
+  for(let d=1;d<=dim();d++){
+    const w=new Date(cur.y,cur.m,d).getDay(),v=get(d),s=dayTot(d);
+    const tms=[[v[0],v[1]],[v[2],v[3]]].filter(p=>p[0]||p[1]).map(p=>(p[0]||"--:--")+"–"+(p[1]||"--:--")).join("  ·  ");
+    out+='<div class="day'+(w%6===0?" we":"")+(isCur()&&d===now.getDate()?" today":"")+(openDay===d?" open":"")+'" id="d'+d+'"><button class="sum" data-t="'+d+'"><span class="n">'+d+'<small>'+GG[w]+'</small></span><span class="tm">'+tms+'</span><span class="t">'+(s?fmt(s):"")+'</span></button>'+
+    '<div class="ed">'+[0,1].map(k=>'<div class="sh"><label>Turno '+(k+1)+'</label>'+field(d,k*2,v[k*2])+field(d,k*2+1,v[k*2+1])+'</div>').join("")+
+    '<div class="acts"><button data-copy="'+d+'">Copia giorno prec.</button><button data-clr="'+d+'">Svuota giorno</button></div></div></div>';
+  }
+  $("list").innerHTML=out;
+}
+function render(){$("title").textContent=MESI[cur.m]+" "+cur.y;hero();stats();list()}
+
+function arch(){
+  const ks=Object.keys(data).filter(k=>Object.keys(data[k]||{}).length).sort().reverse();
+  if(!ks.length){$("va").innerHTML='<p class="empty">Nessun mese registrato.<br>Quando inserisci le ore, i mesi compaiono qui.</p>';return}
+  const yt={};let all=0,gg=0;
+  ks.forEach(k=>{const s=mstats(k);yt[k.slice(0,4)]=(yt[k.slice(0,4)]||0)+s.t;all+=s.t;gg+=s.g});
+  let out='<div class="stats"><div class="stat"><span>Totale ore</span><b>'+fmt(all)+'</b></div><div class="stat"><span>Giorni</span><b>'+gg+'</b></div><div class="stat"><span>Mesi</span><b>'+ks.length+'</b></div></div>',yr="";
+  ks.forEach(k=>{
+    if(k.slice(0,4)!==yr){yr=k.slice(0,4);out+='<div class="yh"><b>'+yr+'</b><span>'+fmt(yt[yr])+(cfg.dec?" ore":" h")+'</span></div>'}
+    const s=mstats(k);
+    out+='<div class="am"><button class="ao" data-open="'+k+'"><b>'+MESI[+k.slice(5)-1]+'</b><small>'+s.g+' giorni · media '+fmt(s.g?Math.round(s.t/s.g):0)+'</small></button><span class="at">'+fmt(s.t)+'</span><button class="ap" data-pdf="'+k+'">PDF</button></div>';
+  });
+  $("va").innerHTML=out;
+}
+function seg(key,items){return '<div class="seg">'+items.map(i=>'<button data-seg="'+key+'" data-v="'+i[0]+'" class="'+(String(cfg[key])===i[0]?"on":"")+'">'+i[1]+'</button>').join("")+'</div>'}
+function sets(){
+  $("vs").innerHTML=
+  '<div class="card"><h3>Orari di inizio standard</h3><div class="row"><label>Turno 1</label><input type="time" id="s1" value="'+cfg.s1+'"></div><div class="row"><label>Turno 2</label><input type="time" id="s2" value="'+cfg.s2+'"></div></div>'+
+  '<div class="card"><h3>PDF e compenso</h3><div class="row"><label>Nome nel PDF</label><input type="text" id="nm" placeholder="Facoltativo" value="'+esc(cfg.name)+'"></div><div class="row"><label>Paga oraria (€)</label><input type="number" id="rt" min="0" step="0.01" inputmode="decimal" placeholder="0" value="'+(cfg.rate||"")+'"></div></div>'+
+  '<div class="card"><h3>Formato delle ore</h3>'+seg("dec",[["false","7:30"],["true","7,50"]])+'</div>'+
+  '<div class="card"><h3>Aspetto</h3>'+seg("theme",[["auto","Auto"],["light","Chiaro"],["dark","Scuro"]])+'<div class="sw" style="margin-top:14px">'+PAL.map((p,i)=>'<button data-pal="'+i+'" class="'+(i===cfg.pal?"on":"")+'" style="background:linear-gradient(135deg,'+p[0]+','+p[1]+')" aria-label="Colore '+(i+1)+'"></button>').join("")+'</div></div>'+
+  '<div class="card"><h3>I tuoi dati</h3><p style="margin:0 0 10px;font-size:13px;color:var(--mu)">Le ore sono salvate solo su questo dispositivo e le vedi solo tu. Fai ogni tanto un backup.</p><div class="acts" style="margin-top:0"><button id="bk">Salva backup</button><button id="rs">Ripristina backup</button></div></div>';
+}
+function show(){
+  ["m","a","s"].forEach(t=>$("v"+t).style.display=tab===t?"":"none");
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+  $("hn").style.display=$("bar").style.display=tab==="m"?"":"none";
+  if(tab==="a")arch();if(tab==="s")sets();window.scrollTo(0,0);
+}
+document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b){tab=b.dataset.tab;show()}};
+
+$("list").addEventListener("click",e=>{
+  const t=e.target.closest("[data-t]");
+  if(t){const d=+t.dataset.t;openDay=openDay===d?null:d;list();if(openDay)$("d"+d).scrollIntoView({block:"nearest",behavior:"smooth"});return}
+  const n=e.target.closest(".now");
+  if(n){const d=+n.dataset.d,ii=+n.dataset.i,v=get(d);v[ii]=ii%2?nowStr():STD()[ii];set(d,v);render();return}
+  const c=e.target.closest("[data-copy]");
+  if(c){const d=+c.dataset.copy;for(let p=d-1;p>=1;p--){const v=get(p);if(v.some(x=>x)){set(d,v.slice());render();toast("Copiato dal giorno "+p);return}}toast("Nessun giorno precedente");return}
+  const x=e.target.closest("[data-clr]");
+  if(x){set(+x.dataset.clr,EMPTY());render()}
+});
+$("list").addEventListener("change",e=>{const t=e.target;if(t.type!=="time")return;const d=+t.dataset.d,v=get(d);v[+t.dataset.i]=t.value;set(d,v);render()});
+function go(n){cur.m+=n;if(cur.m<0){cur.m=11;cur.y--}if(cur.m>11){cur.m=0;cur.y++}openDay=null;render();window.scrollTo(0,0)}
+$("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
+
+$("va").addEventListener("click",e=>{
+  const o=e.target.closest("[data-open]");
+  if(o){const k=o.dataset.open;cur={y:+k.slice(0,4),m:+k.slice(5)-1};openDay=null;tab="m";render();show();return}
+  const p=e.target.closest("[data-pdf]");if(p)exportPdf(p.dataset.pdf);
+});
+$("vs").addEventListener("input",e=>{
+  const i=e.target.id;
+  if(i==="s1")cfg.s1=e.target.value||"12:00";
+  else if(i==="s2")cfg.s2=e.target.value||"19:00";
+  else if(i==="nm")cfg.name=e.target.value;
+  else if(i==="rt")cfg.rate=Math.max(0,parseFloat(e.target.value)||0);
+  else return;
+  saveCfg();render();
+});
+$("vs").addEventListener("click",e=>{
+  const s=e.target.closest("[data-seg]");
+  if(s){const k=s.dataset.seg;cfg[k]=k==="dec"?s.dataset.v==="true":s.dataset.v;saveCfg();applyCfg();render();sets();return}
+  const p=e.target.closest("[data-pal]");
+  if(p){cfg.pal=+p.dataset.pal;saveCfg();applyCfg();sets();return}
+  if(e.target.id==="bk")saveFile("backup-ore-lavoro.json",JSON.stringify({v:2,data,cfg}));
+  if(e.target.id==="rs")$("file").click();
+});
+$("file").onchange=async e=>{
+  try{const f=e.target.files[0];if(!f)return;const o=JSON.parse(await f.text());
+    if(!o||typeof o!=="object")throw 0;
+    if(o.data){Object.assign(data,o.data);if(o.cfg)Object.assign(cfg,o.cfg)}else Object.assign(data,o);
+    save();saveCfg();applyCfg();render();show();toast("Backup ripristinato")}
+  catch(err){toast("File non valido")}
+  e.target.value="";
+};
+
+async function saveFile(name,payload){
+  try{
+    const type=name.endsWith(".pdf")?"application/pdf":"application/json";
+    const blob=new Blob([payload],{type});
+    const file=new File([blob],name,{type});
+    if(/Android|iPhone|iPad/i.test(navigator.userAgent)&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:name});return}catch(e){if(e&&e.name==="AbortError")return}
+    }
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  }catch(e){toast("Salvataggio non riuscito")}
+}
+async function exportPdf(k){
+  try{
+    if(!window.jspdf){toast("Libreria PDF non caricata");return}
+    const c={y:+k.slice(0,4),m:+k.slice(5)-1},rows=[],wk=[];let t=0,g=0;
+    for(let d=1;d<=dim(c);d++){
+      const v=getK(k,d),w=new Date(c.y,c.m,d).getDay(),s=totV(v);
+      if(!v.some(x=>x))continue;
+      t+=s;if(s)g++;wk.push(w%6===0);rows.push([d+" "+GG[w],v[0],v[1],v[2],v[3],s?fmt(s):""]);
+    }
+    if(!rows.length){toast("Nessun giorno lavorato in questo mese");return}
+    const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),hx=PAL[cfg.pal][0],rgb=[1,3,5].map(i=>parseInt(hx.substr(i,2),16));
+    doc.setFontSize(16);doc.text("Ore di lavoro - "+MESI[c.m]+" "+c.y,14,16);
+    if(cfg.name){doc.setFontSize(10);doc.text(cfg.name,14,22)}
+    const foot=[["TOTALE MESE","","","","",fmt(t)],["Giorni lavorati: "+g,"","","","","Media: "+fmt(g?Math.round(t/g):0)]];
+    if(cfg.rate>0)foot.push(["Compenso ("+String(cfg.rate).replace(".",",")+" EUR/h)","","","","",money(t)+" EUR"]);
+    doc.autoTable({startY:cfg.name?26:22,
+      head:[["Giorno","Turno 1 inizio","Turno 1 fine","Turno 2 inizio","Turno 2 fine","Totale giorno"]],
+      body:rows,foot,showFoot:"lastPage",
+      styles:{fontSize:9,cellPadding:1.5,halign:"center"},columnStyles:{0:{halign:"left"}},
+      headStyles:{fillColor:rgb},footStyles:{fillColor:[232,234,246],textColor:20,fontStyle:"bold"},
+      didParseCell:h=>{if(h.section==="body"&&wk[h.row.index])h.cell.styles.fillColor=[244,245,248]}});
+    await saveFile("ore-lavoro-"+k+".pdf",doc.output("arraybuffer"));
+  }catch(e){toast("Esportazione non riuscita")}
+}
+$("pdf").onclick=()=>exportPdf(mk());
+
+setInterval(()=>{now=new Date();if(tab==="m"&&isCur())hero()},30000);
+if("serviceWorker" in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(()=>{});
+applyCfg();render();
+</script>
+</body>
+</html>
