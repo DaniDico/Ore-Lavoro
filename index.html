@@ -93,13 +93,15 @@ nav button.on{color:var(--ac);font-weight:600}
 nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .yh{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 4px}
 .yh b{font-size:22px;letter-spacing:-.02em}.yh span{color:var(--mu);font-size:14px}
-.am{display:grid;grid-template-columns:1fr auto;gap:0 14px;align-items:center;padding:12px 0;border-top:1px solid var(--ln)}
+.am{display:grid;grid-template-columns:1fr auto;gap:0 14px;align-items:center;padding:12px 14px 14px 18px;margin-bottom:8px;border-radius:14px;background:var(--hb);box-shadow:inset 5px 0 0 var(--hc);transition:background .3s,box-shadow .3s}
 .ao{text-align:left}.ao b{display:block;font-size:17px;font-weight:600}.ao small{color:var(--mu);font-size:13px}
 .am .r{display:flex;align-items:center;gap:12px}
 .am .tt{font-size:20px;font-weight:700}
 .ap{height:34px;padding:0 13px;border-radius:99px;border:1px solid var(--ln);font-size:13px;font-weight:600}
 .ar{grid-column:1/-1;height:5px;border-radius:9px;background:var(--ln);margin-top:10px;overflow:hidden}
-.ar i{display:block;height:100%;background:var(--ac);border-radius:9px}
+.ar i{display:block;height:100%;background:var(--hc);border-radius:9px}
+.lg{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mu);margin:4px 0 2px}
+.lg i{flex:1;height:6px;border-radius:9px;background:linear-gradient(90deg,hsl(212 62% 52%),hsl(165 55% 46%),hsl(100 55% 48%),hsl(45 85% 52%),hsl(8 82% 52%))}
 .none{text-align:center;color:var(--mu);padding:56px 10px}
 .gp{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:2px 16px;margin-bottom:14px}
 .gp h3{margin:0;padding:14px 0 6px;font-size:16px;font-weight:700}
@@ -128,7 +130,7 @@ nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;st
 .cs input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
 .sub{margin:0;padding:10px 0 8px;font-size:14px;color:var(--mu)}
 .sw.tight{padding-bottom:6px}
-@media (prefers-reduced-motion:reduce){.tg,.tg::after{transition:none}}
+@media (prefers-reduced-motion:reduce){.tg,.tg::after,.am{transition:none}}
 </style>
 </head>
 <body>
@@ -256,13 +258,14 @@ function render(){
 function arch(){
   const ks=Object.keys(data).filter(k=>Object.keys(data[k]||{}).length).sort().reverse();
   if(!ks.length){$("va").innerHTML='<p class="none">Ancora nessun mese registrato.<br>Inserisci le ore nella scheda Mese e compariranno qui.</p>';return}
-  const yt={};let all=0,gg=0,mx=1;
-  ks.forEach(k=>{const s=mstats(k);yt[k.slice(0,4)]=(yt[k.slice(0,4)]||0)+s.t;all+=s.t;gg+=s.g;mx=Math.max(mx,s.t)});
-  let out='<div class="sm"><div><b class="num">'+fmt(all)+'</b><span>ore totali</span></div><div><b class="num">'+gg+'</b><span>giorni</span></div><div><b class="num">'+ks.length+'</b><span>mesi</span></div></div>',yr="";
+  const yt={};let all=0,gg=0,mx=1,mn=Infinity;
+  ks.forEach(k=>{const s=mstats(k);yt[k.slice(0,4)]=(yt[k.slice(0,4)]||0)+s.t;all+=s.t;gg+=s.g;mx=Math.max(mx,s.t);mn=Math.min(mn,s.t)});
+  const heat=t=>{const p=mx>mn?(t-mn)/(mx-mn):.5,i=t/mx,H=Math.round(212-204*p),S=Math.round(30+50*i);return "--hc:hsl("+H+" "+S+"% 50%);--hb:hsla("+H+","+S+"%,50%,"+(0.04+0.2*i).toFixed(3)+")"};
+  let out='<div class="sm"><div><b class="num">'+fmt(all)+'</b><span>ore totali</span></div><div><b class="num">'+gg+'</b><span>giorni</span></div><div><b class="num">'+ks.length+'</b><span>mesi</span></div></div>'+(ks.length>1?'<div class="lg"><span>meno ore</span><i></i><span>più ore</span></div>':"")+'<div style="height:6px"></div>',yr="";
   ks.forEach(k=>{
     if(k.slice(0,4)!==yr){yr=k.slice(0,4);out+='<div class="yh"><b>'+yr+'</b><span class="num">'+fmt(yt[yr])+' ore</span></div>'}
     const s=mstats(k);
-    out+='<div class="am"><button class="ao" data-open="'+k+'"><b>'+MESI[+k.slice(5)-1]+'</b><small>'+s.g+(s.g===1?" giorno, media ":" giorni, media ")+fmt(s.g?Math.round(s.t/s.g):0)+'</small></button><div class="r"><span class="tt num">'+fmt(s.t)+'</span><button class="ap" data-pdf="'+k+'">PDF</button></div><div class="ar"><i style="width:'+Math.round(s.t/mx*100)+'%"></i></div></div>';
+    out+='<div class="am" style="'+heat(s.t)+'"><button class="ao" data-open="'+k+'"><b>'+MESI[+k.slice(5)-1]+'</b><small>'+s.g+(s.g===1?" giorno, media ":" giorni, media ")+fmt(s.g?Math.round(s.t/s.g):0)+'</small></button><div class="r"><span class="tt num">'+fmt(s.t)+'</span><button class="ap" data-pdf="'+k+'">PDF</button></div><div class="ar"><i style="width:'+Math.round(s.t/mx*100)+'%"></i></div></div>';
   });
   $("va").innerHTML=out;
 }
